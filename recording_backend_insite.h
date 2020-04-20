@@ -1,10 +1,17 @@
 #ifndef RECORDING_BACKEND_INSITE_H
 #define RECORDING_BACKEND_INSITE_H
 
+#include <unordered_map>
+#include <cpprest/http_client.h>
+#include <pqxx/pqxx>
+
 #include "data_storage.hpp"
 #include "http_server.hpp"
-
 #include "recording_backend.h"
+#include "nest_types.h"
+#include "node_collection.h"
+
+#include "neuron_info.hpp"
 
 namespace insite {
 
@@ -52,8 +59,16 @@ class RecordingBackendInsite : public nest::RecordingBackend {
                          DictionaryDatum& params) const override;
 
  private:
+  std::string get_port_string() const;
+
   DataStorage data_storage_;
+  pqxx::connection database_connection_;
   HttpServer http_server_;
+  int simulation_node_id_;
+  std::vector<NeuronInfo> neuron_infos_;
+  std::vector<NeuronInfo> new_neuron_infos_;
+  std::unordered_map<nest::index, MultimeterInfo> multimeter_infos_;
+  double latest_simulation_time_ = 0;
 };
 
 }  // namespace insite

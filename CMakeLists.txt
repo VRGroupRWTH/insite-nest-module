@@ -105,6 +105,7 @@ project( ${MODULE_NAME} CXX )
 
 # Add cpprestsdk
 find_package(cpprestsdk REQUIRED)
+find_package(libpqxx REQUIRED)
 
 # Get the Python executable (for help generation).
 execute_process(
@@ -283,7 +284,7 @@ if ( BUILD_SHARED_LIBS )
   install( TARGETS ${MODULE_NAME}_module
       DESTINATION ${CMAKE_INSTALL_LIBDIR}
       )
-  target_link_libraries(${MODULE_NAME}_module PRIVATE cpprestsdk::cpprest)
+  target_link_libraries(${MODULE_NAME}_module PRIVATE cpprestsdk::cpprest libpqxx::pqxx_shared)
 endif ()
 
 # Build dynamic/static library for standard linking from NEST.
@@ -298,6 +299,7 @@ set_target_properties( ${MODULE_NAME}_lib
     COMPILE_FLAGS "${NEST_CXXFLAGS}"
     LINK_FLAGS "${NEST_LIBS}"
     OUTPUT_NAME ${MODULE_NAME} )
+target_link_libraries(${MODULE_NAME}_lib PRIVATE cpprestsdk::cpprest libpqxx::pqxx_shared)
 
 # Install library, header and sli init files.
 install( TARGETS ${MODULE_NAME}_lib DESTINATION ${CMAKE_INSTALL_LIBDIR} )
@@ -340,6 +342,11 @@ if ( ( NOT CMAKE_CROSSCOMPILING )
 
 endif ()
 
+configure_file(
+  ${CMAKE_SOURCE_DIR}/examples/run_brunel_simulation.sh.in
+  ${CMAKE_BINARY_DIR}/run_brunel_simulation.sh
+  @ONLY
+)
 
 message( "" )
 message( "-------------------------------------------------------" )
