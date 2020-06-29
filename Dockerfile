@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM ubuntu:18.04
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     cmake g++ make ninja-build python3 python3-dev python3-pip python3-numpy python3-scipy python3-matplotlib \
@@ -40,16 +40,18 @@ RUN cmake \
     /libpqxx
 RUN ninja && ninja install
 
-COPY . /insite
-WORKDIR /insite-build
+COPY src /insite-module
+WORKDIR /insite-module-build
 RUN cmake \
     -G Ninja \
     -Dwith-nest=/nest-install/bin/nest-config \
     -DCMAKE_BUILD_TYPE=Release \
-    /insite
+    /insite-module
 RUN ninja && ninja install
 ENV PGPASSWORD=postgres
 
+COPY example /example
+
 EXPOSE 8000
-ENTRYPOINT "/insite-build/run_brunel_simulation.sh"
-CMD 1000 2500 2
+ENTRYPOINT ["/insite-module-build/run_simulation.sh"]
+CMD ["/example/brunel_simulation.py"]
